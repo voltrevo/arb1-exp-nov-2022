@@ -8,8 +8,8 @@ async function main() {
   const wallet = ApproverSCW__factory.connect(scwAddr, eoa);
 
   console.log({
-    balanceAfter: ethers.utils.formatEther(await eoa.getBalance()),
-    cost: ethers.utils.formatEther(await ethers.provider.getBalance(wallet.address)),
+    eoa: ethers.utils.formatEther(await eoa.getBalance()),
+    wallet: ethers.utils.formatEther(await ethers.provider.getBalance(wallet.address)),
   });
 }
 
