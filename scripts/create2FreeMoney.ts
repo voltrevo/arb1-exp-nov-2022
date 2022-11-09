@@ -31,10 +31,33 @@ async function main() {
 
   console.log('Deploying FreeMoney');
 
-  await (await eoa.sendTransaction({
+  const deployTx = {
     to: safeSingletonFactoryAddr,
     data: ethers.utils.solidityPack(['uint256', 'bytes'], [0, FreeMoney.bytecode]),
-  })).wait();
+  };
+
+  try {
+    await (await eoa.sendTransaction(deployTx)).wait();
+  } catch (error) {
+    if ((error as any).code !== 'INSUFFICIENT_FUNDS') {
+      throw error;
+    }
+
+    const gasEstimate = await eoa.estimateGas(deployTx);
+    const gasPrice = await ethers.provider.getGasPrice();
+
+    const balance = await eoa.getBalance();
+
+    console.error(
+      'Insufficient funds:',
+      ethers.utils.formatEther(balance),
+      'ETH, need (approx):',
+      ethers.utils.formatEther(gasEstimate.mul(gasPrice)),
+      'ETH',
+    );
+
+    process.exit(1);
+  }
 
   const deployedCode = await ethers.provider.getCode(addr);
 
